@@ -7,11 +7,17 @@ pygame.display.set_caption("First Game!")
 VEL = 5
 BULLET_VEL = 7
 MAX_BULLET = 4
+
+YELLOW_HIT = pygame.USEREVENT + 1
+RED_HIT = pygame.USEREVENT + 2
+
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+YELLOW = (255, 255, 0)
 FPS = 60
 SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 60, 42
-BORDER = pygame.Rect((WIDTH/2 - 5), 0, 10, HEIGHT)
+BORDER = pygame.Rect((WIDTH//2 - 5), 0, 10, HEIGHT)
 
 
 YELLOW_SPACESHIP = pygame.transform.rotate(pygame.transform.scale(pygame.image.load(os.path.join('Assets', 'spaceship_yellow.png')),
@@ -20,12 +26,21 @@ YELLOW_SPACESHIP = pygame.transform.rotate(pygame.transform.scale(pygame.image.l
 RED_SPACESHIP = pygame.transform.rotate(pygame.transform.scale(pygame.image.load(os.path.join('Assets', 'spaceship_red.png')),
                                           (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 270)
 
+SPACE = pygame.image.load(os.path.join('Assets', 'space.png'))
 
-def draw_window(red, yellow):
-    WIN.fill(WHITE)
+
+def draw_window(red, yellow, red_bullets, yellow_bullets):
+    WIN.blit(SPACE, (0, 0))
     pygame.draw.rect(WIN, BLACK, BORDER)
     WIN.blit(YELLOW_SPACESHIP, (yellow.x, yellow.y))
     WIN.blit(RED_SPACESHIP, (red.x, red.y))
+
+    for bullet in red_bullets:
+        pygame.draw.rect(WIN, RED, bullet)
+
+    for bullet in yellow_bullets:
+        pygame.draw.rect(WIN, YELLOW, bullet)
+
     pygame.display.update()
 
 
@@ -52,7 +67,22 @@ def red_movement(keys_pressed, red):
 
 
 def handle_bullets(yellow_bullets, red_bullets, red, yellow):
-    
+    for bullet in yellow_bullets:
+        bullet.x += BULLET_VEL
+        if yellow.colliderect(bullet):
+            pygame.event.post(pygame.event.Event(RED_HIT))
+            yellow_bullets.remove(bullet)
+        elif bullet.x > WIDTH:
+            yellow_bullets.remove(bullet)
+
+    for bullet in red_bullets:
+        bullet.x -= BULLET_VEL
+        if red.colliderect(bullet):
+            pygame.event.post(pygame.event.Event(YELLOW_HIT))
+            red_bullets.remove(bullet)
+        elif bullet.x < 0:
+            red_bullets.remove(bullet)
+
 
 def main():
     red = pygame.Rect(700, 300, SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
@@ -71,11 +101,11 @@ def main():
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LALT and len(yellow_bullets) < MAX_BULLET:
-                    bullet = pygame.Rect(yellow.x + yellow.width, yellow.y + yellow.height/2 - 2, 10, 5)
+                    bullet = pygame.Rect(yellow.x + yellow.width, yellow.y + yellow.height / 2 - 2, 10, 5)
                     yellow_bullets.append(bullet)
                 if event.key == pygame.K_RALT and len(red_bullets) < MAX_BULLET:
-                    bullet = pygame.Rect(red.x, red.y + red.height / 2 - 2, 10, 5)
-                    red_bullets.append(bullet)
+                    bullet_red = pygame.Rect(red.x, red.y + red.height / 2 - 2, 10, 5)
+                    red_bullets.append(bullet_red)
 
         print(red_bullets, yellow_bullets)
 
@@ -87,7 +117,7 @@ def main():
 
         handle_bullets(yellow_bullets, red_bullets, yellow, red)
 
-        draw_window(red, yellow)
+        draw_window(red, yellow, red_bullets, yellow_bullets)
 
     pygame.quit()
 

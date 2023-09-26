@@ -72,7 +72,7 @@ def yellow_movement(keys_pressed, yellow):
 def red_movement(keys_pressed, red):
     if keys_pressed[pygame.K_LEFT] and red.x - VEL > BORDER.x + BORDER.width:  # left
         red.x += -VEL
-    if keys_pressed[pygame.K_0] and red.y + VEL + red.height + 15 < HEIGHT:  # down
+    if keys_pressed[pygame.K_DOWN] and red.y + VEL + red.height + 15 < HEIGHT:  # down
         red.y += VEL
     if keys_pressed[pygame.K_RIGHT] and red.x + VEL + red.width - 20 < WIDTH:  # right
         red.x += VEL
